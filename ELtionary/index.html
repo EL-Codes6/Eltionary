@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELtionary · ELcodes dictionary</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+  
+</head>
+<body>
+    <div class="dictionary-3d">
+        <!-- ELtionary brand header (new) -->
+        <div class="site-brand">
+            <h1 class="glow-title">ELtionary</h1>
+            <div class="tagline">expand your lexicon · 3D</div>
+        </div>
+
+        <!-- search area -->
+        <div class="search-panel">
+            <input type="text" id="wordInput" placeholder="e.g. serendipity" value="cosmic" autofocus>
+            <button id="searchBtn">🔍 define</button>
+        </div>
+
+        <!-- 3D card that tilts with mouse -->
+        <div class="card-3d" id="tiltCard">
+            <div class="definition-content" id="definitionContent">
+                <!-- dynamic content from javascript -->
+                <div class="loading-placeholder">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span style="margin-left: 10px;">enter a word</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- footer with name -->
+        <div class="footer-note">✨ ELtionary · ELcodes dictionary · powered by free API ✨</div>
+    </div>
+
+ 
+</body>
+</html>
