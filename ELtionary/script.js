@@ -34,8 +34,30 @@
             container.addEventListener('mousemove', updateTilt);
             container.addEventListener('mouseleave', resetTilt);
 
-            // ----- dictionary API integration (unchanged, reliable) -----
+            // ----- dictionary API integration -----
             const API_BASE = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
+            const FALLBACK_API_BASE = 'https://en.wiktionary.org/api/rest_v1/page/definition/';
+
+            async function fetchFromWiktionary(word) {
+                const response = await fetch(FALLBACK_API_BASE + encodeURIComponent(word));
+                if (!response.ok) throw new Error(`Fallback API error: ${response.status}`);
+
+                const data = await response.json();
+                const definitions = data.en || [];
+                if (!definitions.length) throw new Error(`No definition found for "${word}"`);
+
+                const meanings = definitions.map(meaning => ({
+                    partOfSpeech: meaning.partOfSpeech,
+                    definitions: (meaning.definitions || []).map(definition => ({
+                        definition: new DOMParser().parseFromString(definition.definition, 'text/html').body.textContent,
+                        example: definition.examples?.[0]
+                            ? new DOMParser().parseFromString(definition.examples[0], 'text/html').body.textContent
+                            : ''
+                    }))
+                }));
+
+                return { word, meanings };
+            }
 
             async function fetchDefinition(word) {
                 if (!word.trim()) return;
@@ -45,13 +67,16 @@
                 </div>`;
 
                 try {
-                    const response = await fetch(API_BASE + encodeURIComponent(word.trim().toLowerCase()));
-                    if (!response.ok) {
-                        if (response.status === 404) throw new Error(`No definition found for "${word}"`);
-                        else throw new Error(`API error: ${response.status}`);
+                    const normalizedWord = word.trim().toLowerCase();
+                    try {
+                        const response = await fetch(API_BASE + encodeURIComponent(normalizedWord));
+                        if (!response.ok) throw new Error(`API error: ${response.status}`);
+                        const data = await response.json();
+                        renderDefinition(data[0]);
+                    } catch {
+                        const entry = await fetchFromWiktionary(normalizedWord);
+                        renderDefinition(entry);
                     }
-                    const data = await response.json();
-                    renderDefinition(data[0]);
                 } catch (error) {
                     contentDiv.innerHTML = `<div class="error-message">😕 ${error.message}</div>`;
                 }
